@@ -1,6 +1,9 @@
-import {
-    useParams
-} from "react-router";
+// import {
+//     useParams
+// } from "react-router";
+import Swal from 'sweetalert2'
+
+
 
 const getState = ({
     getStore,
@@ -13,12 +16,115 @@ const getState = ({
             characterInfo: {},
             // favoritos:["Luke","Leia"]
             favorites: [],
+            auth: false,
+            Swal: require('sweetalert2')
+
         },
 
         actions: {
             // Use getActions to call a function within a fuction
-            exampleFunction: () => {
-                getActions().changeColor(0, "green");
+            // exampleFunction: () => {
+            //     getActions().changeColor(0, "green");
+            // },
+
+            login: (userEmail, userPassword) => {
+                fetch('https://3000-agusalvs-authflaskreact-0gjai0a0a45.ws-us84.gitpod.io/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                            // 'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: JSON.stringify({
+                            "email": userEmail,
+                            "password": userPassword
+                        }) // body data type must match "Content-Type" header
+                    })
+                    .then((response) => {
+                        console.log(response.status);
+                        if (response.status === 200) {
+                            Swal.fire({
+                                position: 'middle',
+                                icon: 'success',
+                                title: 'Logged in',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                            setStore({
+                                auth: true
+                            })
+                        }
+                        return response.json()
+                    })
+                    .then((data) => {
+                        console.log(data)
+                        if (data.msg === "Bad email or password") {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: data.msg,
+                                // footer: '<a href="">Why do I have this issue?</a>'
+                            })(data.msg)
+                        } else if (data.msg === "You need to signup") {
+                            Swal.fire({
+                                title: data.msg,
+                                showClass: {
+                                    popup: 'animate__animated animate__fadeInDown'
+                                },
+                                hideClass: {
+                                    popup: 'animate__animated animate__fadeOutUp'
+                                }
+                            })
+                        }
+                        localStorage.setItem("token", data.access_token)
+                    })
+                    .catch((err) => console.log(err))
+            },
+
+            logout: () => {
+                localStorage.removeItem('token');
+                setStore({
+                    auth: false
+                })
+            },
+
+            signup: (userEmail, userPassword, userUsername, userFullname) => {
+                fetch('https://3000-agusalvs-authflaskreact-0gjai0a0a45.ws-us84.gitpod.io/signup', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                            // 'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: JSON.stringify({
+                            "email": userEmail,
+                            "password": userPassword,
+                            "username": userUsername,
+                            "fullname": userFullname
+                        }) // body data type must match "Content-Type" header
+                    })
+                    .then((response) => {
+                        console.log(response.status);
+                        if (response.status === 200) {
+                            Swal.fire({
+                                position: 'middle',
+                                icon: 'success',
+                                title: 'You have successfully signed up',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        }
+                        return response.json()
+                    })
+                    .then((data) => {
+                        console.log(data)
+                        if (data.msg === 'This user has already been created') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: data.msg,
+                            })(data.msg)
+                        }
+                    })
+                    .catch((err) => console.log(err))
             },
 
             // loadSomeData: () => {
@@ -34,7 +140,7 @@ const getState = ({
 
             charactersInfo: () => {
                 /**
-                	fetch().then().then(data => setStore({ "foo": data.bar }))
+                fetch().then().then(data => setStore({ "foo": data.bar }))
                 */
                 fetch("https://www.swapi.tech/api/people/")
                     .then(res => res.json())
