@@ -14,10 +14,12 @@ const getState = ({
         store: {
             characters: [],
             characterInfo: {},
-            // favoritos:["Luke","Leia"]
+            planets: [],
+            planetInfo: {},
             favorites: [],
             auth: false,
-            Swal: require('sweetalert2')
+            Swal: require('sweetalert2'),
+            starships: [],
 
         },
 
@@ -154,10 +156,39 @@ const getState = ({
             getcharacterInfo: (id) => {
                 fetch("https://www.swapi.tech/api/people/" + id)
                     .then(res => res.json())
-                    // .then(data => console.log(data))
                     .then((data) => setStore({
                         characterInfo: data.result
                     }))
+            },
+
+            planetsInfo: () => {
+                /**
+                fetch().then().then(data => setStore({ "foo": data.bar }))
+                */
+                fetch("https://www.swapi.tech/api/planets/")
+                    .then(res => res.json())
+                    // .then(data => console.log(data))
+                    .then((data) => setStore({
+                        planets: data.results
+                    }));
+                // .catch(err => console.error(err))
+            },
+
+            getPlanetInfo: (id) => {
+                fetch("https://www.swapi.tech/api/planets/" + id)
+                    .then(res => res.json())
+                    .then((data) => setStore({
+                        planetInfo: data.result
+                    }))
+            },
+
+            starshipsInfo: () => {
+                fetch("https://www.swapi.tech/api/starships/")
+                    .then(res => res.json())
+                    // .then(data => console.log(data))
+                    .then((data) => setStore({
+                        starships: data.results
+                    }));
                 // .catch(err => console.error(err))
             },
 
